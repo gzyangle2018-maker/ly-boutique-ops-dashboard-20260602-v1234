@@ -1,9 +1,10 @@
-import { Bot, ExternalLink, Zap, Power } from 'lucide-react';
+import { Bot, ExternalLink, Zap, Power, Key, AlertTriangle } from 'lucide-react';
 import type { Agent } from '@/types';
 import { AGENT_CATEGORY_LABELS } from '@/types';
 
 interface AgentCardProps {
   agent: Agent;
+  hasApiKey?: boolean;
   onToggle?: (id: string) => void;
   onDispatch?: (id: string) => void;
 }
@@ -22,7 +23,7 @@ const modeColors = {
   disabled: 'bg-text-muted/10 text-text-muted border-text-muted/20',
 };
 
-export function AgentCard({ agent, onToggle, onDispatch }: AgentCardProps) {
+export function AgentCard({ agent, hasApiKey, onToggle, onDispatch }: AgentCardProps) {
   return (
     <div className={`panel-card group hover:border-accent-cyan/20 transition-all ${!agent.enabled ? 'opacity-60' : ''}`}>
       {/* Header */}
@@ -61,9 +62,17 @@ export function AgentCard({ agent, onToggle, onDispatch }: AgentCardProps) {
       </div>
 
       {/* Owner & Permissions */}
-      <div className="text-[11px] text-text-muted mb-3">
+      <div className="text-[11px] text-text-muted mb-1">
         负责人：{agent.owner} · 权限：{agent.permissions.join('、')}
       </div>
+
+      {/* API Key warning */}
+      {agent.useMode === 'api' && !hasApiKey && (
+        <div className="flex items-center gap-1.5 text-[11px] text-accent-yellow mb-3">
+          <Key size={10} />
+          <span>未配置 API Key — 请先在「模型配置」填入</span>
+        </div>
+      )}
 
       {/* Actions */}
       <div className="flex gap-2">
@@ -79,7 +88,11 @@ export function AgentCard({ agent, onToggle, onDispatch }: AgentCardProps) {
         ) : (
           <button
             onClick={() => onDispatch?.(agent.id)}
-            className="btn-primary text-xs flex items-center gap-1.5"
+            className={`text-xs flex items-center gap-1.5 ${
+              agent.enabled && hasApiKey
+                ? 'btn-primary'
+                : 'btn-secondary text-text-muted'
+            }`}
             disabled={!agent.enabled}
           >
             <Zap size={12} /> 分发任务

@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { ChevronUp, ChevronDown, Search, Filter } from 'lucide-react';
+import { ChevronUp, ChevronDown, Search } from 'lucide-react';
 
 export interface Column<T> {
   key: string;
@@ -18,7 +18,7 @@ interface DataTableProps<T> {
   emptyMessage?: string;
 }
 
-export function DataTable<T extends Record<string, unknown>>({
+export function DataTable<T>({
   columns,
   data,
   searchable = true,
@@ -36,15 +36,15 @@ export function DataTable<T extends Record<string, unknown>>({
       const q = search.toLowerCase();
       rows = rows.filter((row) =>
         columns.some((col) => {
-          const val = row[col.key];
+          const val = (row as Record<string, unknown>)[col.key];
           return val != null && String(val).toLowerCase().includes(q);
         })
       );
     }
     if (sortKey) {
       rows.sort((a, b) => {
-        const av = a[sortKey];
-        const bv = b[sortKey];
+        const av = (a as Record<string, unknown>)[sortKey];
+        const bv = (b as Record<string, unknown>)[sortKey];
         if (av == null && bv == null) return 0;
         if (av == null) return 1;
         if (bv == null) return -1;
@@ -118,7 +118,7 @@ export function DataTable<T extends Record<string, unknown>>({
                 >
                   {columns.map((col) => (
                     <td key={col.key}>
-                      {col.render ? col.render(row) : String(row[col.key] ?? '')}
+                      {col.render ? col.render(row) : String((row as Record<string, unknown>)[col.key] ?? '')}
                     </td>
                   ))}
                 </tr>
